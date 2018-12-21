@@ -18,17 +18,20 @@ public class DemoSecurityConfig extends WebSecurityConfigurerAdapter {
 		// añadir usuarios para autenticacion inmemory:
 		UserBuilder users = User.withDefaultPasswordEncoder();
 
-		auth.inMemoryAuthentication().withUser(users.username("jose").password("jose123").roles("EMPLEADO"));
-		auth.inMemoryAuthentication().withUser(users.username("luis").password("luis123").roles("MANAGER"));
-		auth.inMemoryAuthentication().withUser(users.username("jesus").password("jesus123").roles("ADMIN"));
+		auth.inMemoryAuthentication().withUser(users.username("jose").password("jose123").roles("EMPLEADO", "MANAGER"));
+		auth.inMemoryAuthentication()
+				.withUser(users.username("luis").password("luis123").roles("EMPLEADO", "MANAGER", "ADMIN"));
+		auth.inMemoryAuthentication().withUser(users.username("jesus").password("jesus123").roles("EMPLEADO"));
 
 	}
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 
-		http.authorizeRequests().anyRequest().authenticated().and().formLogin().loginPage("/showMyLoginPage")
-				.loginProcessingUrl("/authenticateTheUser").permitAll().and().logout().permitAll();
+		http.authorizeRequests().antMatchers("/").hasRole("EMPLEADO").antMatchers("/leaders/**").hasRole("MANAGER")
+				.antMatchers("/systems/**").hasRole("ADMIN").and().formLogin().loginPage("/showMyLoginPage")
+				.loginProcessingUrl("/authenticateTheUser").permitAll().and().logout().permitAll().and()
+				.exceptionHandling().accessDeniedPage("/access-denied");
 
 	}
 
