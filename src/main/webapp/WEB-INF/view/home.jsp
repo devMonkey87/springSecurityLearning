@@ -14,7 +14,12 @@
 	<h1>BIENVENIDOS</h1>
 
 	<hr>
+	
+<!-- 	Mediante estas utilidades podemos acceder al valor de las variables -->
+<!-- 	del Principal proveidas por S Security -->
+	
 	<security:authentication property="principal.username" />
+	<security:authentication property="principal.password" />
 	</hr>
 
 
