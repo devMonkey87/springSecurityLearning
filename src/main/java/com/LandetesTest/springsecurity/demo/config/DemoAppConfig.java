@@ -1,5 +1,6 @@
 package com.LandetesTest.springsecurity.demo.config;
 
+import java.beans.PropertyVetoException;
 import java.util.logging.Logger;
 
 import javax.sql.DataSource;
@@ -13,6 +14,8 @@ import org.springframework.core.env.Environment;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
+
+import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 @Configuration
 @EnableWebMvc
@@ -53,7 +56,35 @@ public class DemoAppConfig {
 	@Bean
 	public DataSource securityDataSource() {
 
-		return null;
+		ComboPooledDataSource securityDSource = new ComboPooledDataSource();
 
+		try {
+			securityDSource.setDriverClass(env.getProperty("jdbc.driver"));
+		} catch (PropertyVetoException e) {
+			throw new RuntimeException(e);
+		}
+
+		logger.info(">>>>jdbc.url=" + env.getProperty("jdbc.url"));
+		logger.info(">>>>jdbc.user=" + env.getProperty("jdbc.user  "));
+
+		securityDSource.setJdbcUrl(env.getProperty("jdbc.url"));
+		securityDSource.setUser(env.getProperty("jdbc.user"));
+		securityDSource.setPassword(env.getProperty("jdbc.password"));
+
+		securityDSource.setInitialPoolSize(getIntProperty("connection.pool.initialPoolSize"));
+		securityDSource.setMinPoolSize(getIntProperty("connection.pool.minPoolSize"));
+		securityDSource.setMaxPoolSize(getIntProperty("connection.pool.maxPoolSize"));
+		securityDSource.setMaxIdleTime(getIntProperty("connection.pool.maxIdleTime"));
+
+		return securityDSource;
+
+	}
+
+	private int getIntProperty(String propName) {
+		String propValue = env.getProperty(propName);
+
+		int intPropVal = Integer.parseInt(propValue);
+
+		return intPropVal;
 	}
 }
