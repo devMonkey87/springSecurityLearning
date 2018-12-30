@@ -65,7 +65,7 @@ public class DemoAppConfig {
 		}
 
 		logger.info(">>>>jdbc.url=" + env.getProperty("jdbc.url"));
-		logger.info(">>>>jdbc.user=" + env.getProperty("jdbc.user  "));
+		logger.info(">>>>jdbc.user=" + env.getProperty("jdbc.user"));
 
 		securityDSource.setJdbcUrl(env.getProperty("jdbc.url"));
 		securityDSource.setUser(env.getProperty("jdbc.user"));
@@ -74,7 +74,7 @@ public class DemoAppConfig {
 		securityDSource.setInitialPoolSize(getIntProperty("connection.pool.initialPoolSize"));
 		securityDSource.setMinPoolSize(getIntProperty("connection.pool.minPoolSize"));
 		securityDSource.setMaxPoolSize(getIntProperty("connection.pool.maxPoolSize"));
-		securityDSource.setMaxIdleTime(getIntProperty("connection.pool.maxIdleTime  "));
+		securityDSource.setMaxIdleTime(getIntProperty("connection.pool.maxIdleTime"));
 
 		return securityDSource;
 
