@@ -1,37 +1,31 @@
 package com.LandetesTest.springsecurity.demo.config;
 
-import javax.sql.DataSource;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
+import com.LandetesTest.springsecurity.demo.service.UserService;
 
 @Configuration
 @EnableWebSecurity
 public class DemoSecurityConfig extends WebSecurityConfigurerAdapter {
 
+	// add a reference to our security data source
 	@Autowired
-	private DataSource dataSource;
+	private UserService userService;
+
+	@Autowired
+	private CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
 
 	@Override
 	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-
-		// a�adir usuarios para autenticacion inmemory. Ya no se usa
-		// lo haremos con usuarios de BBDD Mysql
-
-//		UserBuilder users = User.withDefaultPasswordEncoder();
-//
-//		auth.inMemoryAuthentication().withUser(users.username("jose").password("jose123").roles("EMPLEADO", "MANAGER"));
-//		auth.inMemoryAuthentication()
-//				.withUser(users.username("luis").password("luis123").roles("EMPLEADO", "MANAGER", "ADMIN"));
-//		auth.inMemoryAuthentication().withUser(users.username("jesus").password("jesus123").roles("EMPLEADO"));
-
-		// Uso de jdbc authentication
-
-		auth.jdbcAuthentication().dataSource(dataSource);
+		auth.authenticationProvider(authenticationProvider());
 	}
 
 	@Override
@@ -39,9 +33,25 @@ public class DemoSecurityConfig extends WebSecurityConfigurerAdapter {
 
 		http.authorizeRequests().antMatchers("/").hasRole("EMPLOYEE").antMatchers("/leaders/**").hasRole("MANAGER")
 				.antMatchers("/systems/**").hasRole("ADMIN").and().formLogin().loginPage("/showMyLoginPage")
-				.loginProcessingUrl("/authenticateTheUser").permitAll().and().logout().permitAll().and()
-				.exceptionHandling().accessDeniedPage("/access-denied");
+				.loginProcessingUrl("/authenticateTheUser").successHandler(customAuthenticationSuccessHandler)
+				.permitAll().and().logout().permitAll().and().exceptionHandling().accessDeniedPage("/access-denied");
 
+	}
+
+	// beans
+	// bcrypt bean definition
+	@Bean
+	public BCryptPasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
+	}
+
+	// authenticationProvider bean definition
+	@Bean
+	public DaoAuthenticationProvider authenticationProvider() {
+		DaoAuthenticationProvider auth = new DaoAuthenticationProvider();
+		auth.setUserDetailsService(userService); // set the custom user details service
+		auth.setPasswordEncoder(passwordEncoder()); // set the password encoder - bcrypt
+		return auth;
 	}
 
 }
