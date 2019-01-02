@@ -25,6 +25,7 @@ import com.LandetesTest.springsecurity.demo.user.CrmUser;
 public class RegistrationController {
 
 	@Autowired
+
 	private UserService userService;
 
 	private Logger logger = Logger.getLogger(getClass().getName());
